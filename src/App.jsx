@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import ItemContainer from "./components/ItemContainer";
 import Spinner from "./components/Spinner/Spinner";
 import axios from "axios";
-import { Box, Stack, TextInput } from "@mantine/core";
+import { Box, Stack, TextInput, Text, Group } from "@mantine/core";
 
 import "./App.scss";
 
 function App() {
   const [launches, setLaunches] = useState([]);
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
 
@@ -16,6 +17,7 @@ function App() {
 
   const fetchData = (page) => {
     const newItems = [];
+    setIsFetching(true);
     axios
       .get("https://api.spacexdata.com/v3/launches")
       .then((res) => {
@@ -38,26 +40,13 @@ function App() {
         }
         setLaunches(newLaunches);
         setIsPageLoading(false);
+        setIsFetching(false);
       })
       .catch((err) => {
         setIsPageLoading(false);
+        setIsFetching(false);
       });
-
-    // setItems([...items, ...newItems]);
   };
-
-  // useEffect(() => {
-  //   setIsPageLoading(true);
-  //   axios
-  //     .get("https://api.spacexdata.com/v3/launches")
-  //     .then((res) => {
-  //       setLaunches(res.data);
-  //       setIsPageLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       setIsPageLoading(false);
-  //     });
-  // }, []);
 
   useEffect(() => {
     console.log(launches);
@@ -91,11 +80,19 @@ function App() {
         </Box>
       ) : (
         <Box className="content">
-          <TextInput />
+          {/* <TextInput /> */}
           <Stack spacing="sm" mt="xl">
             {launches.map((v, i) => {
               return <ItemContainer item={v} key={v.mission_name} />;
             })}
+
+            {isFetching && (
+              <Box>
+                <Spinner />
+                <Group position="center">
+                <Text>Fetching more data...</Text></Group>
+              </Box>
+            )}
           </Stack>
         </Box>
       )}
